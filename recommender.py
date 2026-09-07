@@ -3,12 +3,21 @@
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 
 DATA_DIR = Path(__file__).parent / "data"
+
+CUSTOM_GROUND_TRUTH: dict[tuple[str, str], dict[str, int]] = {
+    ("Tomato", "Late blight"): {"bio_trichoderma": 3, "copper_fixed": 2},
+    ("Cucumber", "Powdery mildew"): {"potassium_bicarbonate": 3, "sulfur_wettable": 2},
+    ("Tomato", "Aphid"): {"neem_azadirachtin": 3},
+    ("Cabbage", "Caterpillar / armyworm"): {"bacillus_thuringiensis": 3, "spinosad": 2},
+    ("Tomato", "Caterpillar / armyworm"): {"spinosad": 3, "bacillus_thuringiensis": 2},
+}
 
 
 @dataclass(frozen=True)
@@ -30,6 +39,64 @@ class WeatherContext:
 def load_records(filename: str) -> list[dict[str, Any]]:
     with (DATA_DIR / filename).open(encoding="utf-8") as file:
         return json.load(file)
+
+
+def relevance_grade(success_rate: float) -> int:
+    if success_rate >= 0.85:
+        return 3
+    if success_rate >= 0.75:
+        return 2
+    if success_rate >= 0.60:
+        return 1
+    return 0
+
+
+def ground_truth_for(
+    crop: str,
+    diagnosis: str,
+    outbreaks: list[dict[str, Any]],
+) -> dict[str, int]:
+    custom_ground_truth = CUSTOM_GROUND_TRUTH.get((crop, diagnosis))
+    if custom_ground_truth is not None:
+        return custom_ground_truth
+
+    matching_rows = [
+        row for row in outbreaks
+        if row["crop"] == crop and row["diagnosis"] == diagnosis
+    ]
+    return {
+        treatment_id: relevance_grade(sum(row["success_rate"] for row in rows) / len(rows))
+        for treatment_id in {row["treatment_id"] for row in matching_rows}
+        for rows in [[row for row in matching_rows if row["treatment_id"] == treatment_id]]
+    }
+
+
+def ranking_metrics_at_k(
+    recommended_ids: list[str],
+    relevance: dict[str, int],
+    k: int,
+) -> dict[str, float]:
+    ranked_ids = recommended_ids[:k]
+    relevant_count = sum(treatment_id in relevance for treatment_id in ranked_ids)
+    precision = relevant_count / k if k else 0.0
+    recall = relevant_count / len(relevance) if relevance else 0.0
+    f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
+    dcg = sum(
+        (2 ** relevance.get(treatment_id, 0) - 1) / math.log2(rank + 2)
+        for rank, treatment_id in enumerate(ranked_ids)
+    )
+    ideal_grades = sorted(relevance.values(), reverse=True)[:k]
+    ideal_dcg = sum(
+        (2 ** grade - 1) / math.log2(rank + 2)
+        for rank, grade in enumerate(ideal_grades)
+    )
+    ndcg = dcg / ideal_dcg if ideal_dcg else 0.0
+    return {
+        "precision": precision,
+        "recall": recall,
+        "f1": f1,
+        "ndcg": ndcg,
+    }
 
 
 def _weather_fit(treatment: dict[str, Any], weather: WeatherContext) -> tuple[bool, list[str]]:

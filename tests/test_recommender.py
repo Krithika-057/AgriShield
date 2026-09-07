@@ -1,4 +1,4 @@
-from recommender import WeatherContext, recommend
+from recommender import WeatherContext, ground_truth_for, ranking_metrics_at_k, recommend
 
 
 def test_rain_removes_foliar_recommendations():
@@ -19,3 +19,14 @@ def test_category_filter_is_respected():
     results = recommend("Tomato", "Aphid", weather, preferred_category="Organic")
     assert results
     assert all(result["category"] == "Organic" for result in results)
+
+
+def test_custom_ground_truth_is_available_for_demo_query():
+    ground_truth = ground_truth_for("Tomato", "Late blight", [])
+    assert ground_truth == {"bio_trichoderma": 3, "copper_fixed": 2}
+
+
+def test_prediction_metrics_are_calculated_at_each_rank():
+    ground_truth = {"bio_trichoderma": 3, "copper_fixed": 2}
+    metrics = ranking_metrics_at_k(["bio_trichoderma", "copper_fixed"], ground_truth, 1)
+    assert metrics == {"precision": 1.0, "recall": 0.5, "f1": 2 / 3, "ndcg": 1.0}

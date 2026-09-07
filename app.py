@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from recommender import WeatherContext, load_records, recommend
+from recommender import WeatherContext, ground_truth_for, load_records, ranking_metrics_at_k, recommend
 
 
 st.set_page_config(page_title="AgriShield", page_icon="🌱", layout="wide", initial_sidebar_state="expanded")
@@ -74,12 +74,28 @@ if weather.rain_next_6h_mm > 2:
 if not results:
     st.info("No treatment currently satisfies the crop, diagnosis, category, and weather constraints. Try a longer dry window or broaden the intervention preference.")
 else:
+    recommended_ids = [result["id"] for result in results]
+    ground_truth = ground_truth_for(st.session_state.crop, st.session_state.diagnosis, outbreaks)
     for index, result in enumerate(results):
+        prediction_k = index + 1
         left, right = st.columns([5, 1])
         with left:
             st.markdown(f'<div class="rec"><span class="pill">#{index + 1} {result["category"]}</span><h3>{result["name"]}</h3><p>{result["instructions"]}</p><b>Why it fits</b><ul>{"".join(f"<li>{reason}</li>" for reason in result["reasons"])}</ul><small><b>Safety:</b> {result["safety"]}</small></div>', unsafe_allow_html=True)
         with right:
             st.markdown(f'<div class="score">{result["score"]}<br><small>match score</small></div>', unsafe_allow_html=True)
+        if ground_truth:
+            metrics = ranking_metrics_at_k(recommended_ids, ground_truth, prediction_k)
+            relevance_grade = ground_truth.get(result["id"], 0)
+            st.caption(f"Custom relevance grade: {relevance_grade}/3 | Cumulative ranking metrics at K={prediction_k}")
+            metric_cols = st.columns(4)
+            for column, label, value in zip(
+                metric_cols,
+                ["Precision", "Recall", "F1", "NDCG"],
+                [metrics["precision"], metrics["recall"], metrics["f1"], metrics["ndcg"]],
+            ):
+                column.metric(f"{label}@{prediction_k}", f"{value:.3f}")
+        else:
+            st.caption("No custom ground-truth benchmark is available for this crop and diagnosis.")
 
 with st.expander("How this ranking works"):
     st.write("The score blends 62% similar-outbreak success, 18% cost efficiency, and 20% weather/context fit. Treatments are filtered first when rain, heat, or insufficient dry hours would make an application unreliable or unsafe.")
