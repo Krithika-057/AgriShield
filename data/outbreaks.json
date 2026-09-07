@@ -1,0 +1,102 @@
+[
+  {
+    "farm": "Nashik North",
+    "crop": "Tomato",
+    "diagnosis": "Late blight",
+    "humidity": 88,
+    "rain_24h": 0,
+    "treatment_id": "bio_trichoderma",
+    "success_rate": 0.82,
+    "cost_per_acre": 2.7
+  },
+  {
+    "farm": "Nashik East",
+    "crop": "Tomato",
+    "diagnosis": "Late blight",
+    "humidity": 91,
+    "rain_24h": 0,
+    "treatment_id": "copper_fixed",
+    "success_rate": 0.76,
+    "cost_per_acre": 1.9
+  },
+  {
+    "farm": "Pune Valley",
+    "crop": "Late blight",
+    "diagnosis": "Late blight",
+    "humidity": 84,
+    "rain_24h": 3,
+    "treatment_id": "bio_trichoderma",
+    "success_rate": 0.71,
+    "cost_per_acre": 2.4
+  },
+  {
+    "farm": "Satara West",
+    "crop": "Tomato",
+    "diagnosis": "Early blight",
+    "humidity": 79,
+    "rain_24h": 0,
+    "treatment_id": "copper_fixed",
+    "success_rate": 0.8,
+    "cost_per_acre": 1.7
+  },
+  {
+    "farm": "Kolhapur South",
+    "crop": "Cucumber",
+    "diagnosis": "Powdery mildew",
+    "humidity": 82,
+    "rain_24h": 0,
+    "treatment_id": "potassium_bicarbonate",
+    "success_rate": 0.87,
+    "cost_per_acre": 1.1
+  },
+  {
+    "farm": "Nashik North",
+    "crop": "Cucumber",
+    "diagnosis": "Powdery mildew",
+    "humidity": 68,
+    "rain_24h": 0,
+    "treatment_id": "sulfur_wettable",
+    "success_rate": 0.79,
+    "cost_per_acre": 1.3
+  },
+  {
+    "farm": "Pune Valley",
+    "crop": "Tomato",
+    "diagnosis": "Aphid",
+    "humidity": 65,
+    "rain_24h": 0,
+    "treatment_id": "neem_azadirachtin",
+    "success_rate": 0.84,
+    "cost_per_acre": 2.1
+  },
+  {
+    "farm": "Satara West",
+    "crop": "Pepper",
+    "diagnosis": "Aphid",
+    "humidity": 74,
+    "rain_24h": 5,
+    "treatment_id": "neem_azadirachtin",
+    "success_rate": 0.73,
+    "cost_per_acre": 1.9
+  },
+  {
+    "farm": "Kolhapur South",
+    "crop": "Cabbage",
+    "diagnosis": "Caterpillar / armyworm",
+    "humidity": 72,
+    "rain_24h": 0,
+    "treatment_id": "bacillus_thuringiensis",
+    "success_rate": 0.86,
+    "cost_per_acre": 1.5
+  },
+  {
+    "farm": "Pune Valley",
+    "crop": "Tomato",
+    "diagnosis": "Caterpillar / armyworm",
+    "humidity": 55,
+    "rain_24h": 0,
+    "treatment_id": "spinosad",
+    "success_rate": 0.83,
+    "cost_per_acre": 3.2
+  }
+]
